@@ -4,4 +4,12 @@
 
   <h1>Thanks for completing this survey!</h1>
 
+  <ul>
+  {% for ind in range(length) %}
+
+    <li><b>{{survey.questions[ind].prompt}}</b> {{responses[ind]}}</li>
+
+  {% endfor %}
+  </ul>
+
 {% endblock %}
