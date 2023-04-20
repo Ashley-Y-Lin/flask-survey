@@ -3,9 +3,12 @@
 
   <h1>{{ question.prompt }}</h1>
 
+  {% for msg in get_flashed_messages() %}
+    <p>{{ msg }}</p>
+  {% endfor %}
+
   <form action="/answer" method="POST">
 
-      <input name="prompt_num" style="display: none" value={{prompt_num}}>
       <!-- you should have one item like this for every choice -->
       {% for choice in question.choices %}
       <p>
