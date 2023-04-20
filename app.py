@@ -10,38 +10,35 @@ debug = DebugToolbarExtension(app)
 
 RESPONSES_KEY = "responses"
 
+
 @app.get("/")
 def start():
     """Renders survey start page"""
-
     session[RESPONSES_KEY] = []
-    session["curr_question"] = 0
-    #WE KNOW HOW MANY REPSONSES!!!
-    #No need for curr_question
 
-    return render_template("survey_start.html")
+    return render_template("survey_start.html", survey=survey)
 
 
 @app.post("/begin")
 def begin():
     """Handle button to begin survey"""
+    responses_length = len(session.get(RESPONSES_KEY))
 
-    return redirect(f"/questions/{session.get('curr_question')}")
+    return redirect(f"/questions/{responses_length}")
 
 
-# you can turn it into an int in the file path!
 @app.get("/questions/<int:prompt_num>")
 def display_question(prompt_num):
     """Show a single question on the page"""
-    #TODO:store responses length variable
+    responses_length = len(session.get(RESPONSES_KEY))
 
-    if session.get("curr_question") >= len(survey.questions):
+    if responses_length >= len(survey.questions):
         return redirect("/completion")
 
-    if prompt_num != session.get("curr_question"):
-        flash('You were trying to access an invalid question!')
+    if prompt_num != responses_length:
+        flash("You were trying to access an invalid question!")
 
-        return redirect(f"/questions/{session.get('curr_question')}")
+        return redirect(f"/questions/{responses_length}")
 
     question = survey.questions[prompt_num]
 
@@ -52,30 +49,31 @@ def display_question(prompt_num):
 def answer_question():
     """Receive answer and either redirect to next question, or the complete page
     if all questions have been answered"""
-    #TODO:curr_question refactor
-    answer = request.form.get("answer")
 
-    session["curr_question"] += 1
+    answer = request.form.get("answer")
 
     responses = session.get(RESPONSES_KEY)
     responses.append(answer)
     session[RESPONSES_KEY] = responses
 
-    if session.get("curr_question") >= len(survey.questions):
+    responses_length = len(session.get(RESPONSES_KEY))
+
+    if responses_length >= len(survey.questions):
         return redirect("/completion")
 
-    return redirect(f"/questions/{session.get('curr_question')}")
+    return redirect(f"/questions/{responses_length}")
 
 
 @app.get("/completion")
 def show_complete():
     """Show the complete page after user completes survey"""
-
-    if session.get("curr_question") < len(survey.questions):
-        flash('You have more questions to answer!')
-
-        return redirect(f"/questions/{session.get('curr_question')}")
-
     responses_length = len(session.get(RESPONSES_KEY))
 
-    return render_template("completion.html", survey=survey, length=responses_length)
+    if responses_length < len(survey.questions):
+        flash("You have more questions to answer!")
+
+        return redirect(f"/questions/{responses_length}")
+
+    return render_template(
+        "completion.html", survey=survey, responses=session.get(RESPONSES_KEY)
+    )

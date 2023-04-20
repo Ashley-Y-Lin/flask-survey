@@ -5,9 +5,9 @@
   <h1>Thanks for completing this survey!</h1>
 
   <ul>
-  {% for ind in range(length) %}
+  {% for question in survey.questions %}
     <!--loop over questions and access index of question-->
-    <li><b>{{survey.questions[ind].prompt}}</b> {{session.get("responses")[ind]}}</li>
+    <li><b>{{question.prompt}}</b> {{responses[survey.questions.index(question)]}}</li>
 
   {% endfor %}
   </ul>
